@@ -9,13 +9,13 @@ class Mux:
 	def _terminate(self):
 		if not self._dead:
 			self._dead = True
-			message = Message(TERMINATE)
+			message = Message(MessageOp.TERMINATE)
 			self._uplink_send(message)
 
 	def _try_start_child(self, message):
-		if message.opcode != SENDFILE:
+		if message.opcode != MessageOp.SENDFILE:
 			label = "_start_child: expected opening SENDFILE message"
-			message = Message(ERROR, label=label)
+			message = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
 			return
 
@@ -36,27 +36,28 @@ class Mux:
 		self._child_connected = True
 
 	def _handle_uplink_incoming(self, message):
-		if message.opcode() in [SENDLINE, SENDFILE]:
+		if message.opcode() in [MessageOp.SENDLINE, MessageOp.SENDFILE]:
 			self._pipeserver_send(message)
 
-		elif message.opcode() == HEARTBEAT:	
-			response = Message(HEARTBEAT)
+		elif message.opcode() == MessageOp.HEARTBEAT:	
+			response = Message(MessageOp.HEARTBEAT)
 			self._uplink_send(response)
 
 		else:
 			label = "_handle_uplink_incoming: received unexpected message type"
-			response = Message(ERROR, label=label)
+			response = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
 
 	def _handle_pipeserver_incoming(self, message):
-		allow = [SENDLINE, REQUESTLINE, SENDFILE, REQUESTFILE, TERMINATE, ERROR]
+		allow = [MessageOp.SENDLINE, MessageOp.REQUESTLINE, MessageOp.SENDFILE]
+		allow += [MessageOp.REQUESTFILE, MessageOp.TERMINATE, MessageOp.ERROR]
 
 		if message.opcode() in allow:
 			self._uplink_send(message)
 			return
 
 		label = "_handle_pipeserver_incoming: program sent illegal message type"
-		response = Message(ERROR, label=label)
+		response = Message(MessageOp.ERROR, label=label)
 		self._uplink_send(message)
 			
 

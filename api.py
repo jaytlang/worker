@@ -10,19 +10,19 @@ class VMMonitorBugException(Exception): pass
 def print(line):
 	global pipe
 
-	message = Message(SENDLINE, label=line)
+	message = Message(MessageOp.SENDLINE, label=line)
 	pipe.send_message(message)
 	
 def readline():
 	global pipe
 
-	message = Message(REQUESTLINE)
+	message = Message(MessageOp.REQUESTLINE)
 	pipe.send_message(message)
 
 	response = pipe.receive_message()
-	if response.opcode() != SENDLINE:
+	if response.opcode() != MessageOp.SENDLINE:
 		label = "readline: got unexpected response from engine"
-		error = Message(ERROR, label=label)
+		error = Message(MessageOp.ERROR, label=label)
 		pipe.send_message(message)
 
 		raise VMMonitorBugException(label)
@@ -34,7 +34,7 @@ def save(filename):
 
 	with open(filename, 'rb') as f:
 		content = f.read()
-		message = Message(SENDFILE, label=filename, file=content)
+		message = Message(MessageOp.SENDFILE, label=filename, file=content)
 		pipe.send_message(message)
 
 def load(filename, mode):
@@ -43,13 +43,13 @@ def load(filename, mode):
 	if os.path.exists(filename):
 		return open(filename, mode)
 
-	message = Message(REQUESTFILE, label=filename)
+	message = Message(MessageOp.REQUESTFILE, label=filename)
 	pipe.send_message(message)
 
 	response = pipe.receive_message()
-	if response.opcode() != SENDFILE:
+	if response.opcode() != MessageOp.SENDFILE:
 		label = "load: got unexpected response from engine"
-		error = Message(ERROR, label=label)
+		error = Message(MessageOp.ERROR, label=label)
 		pipe.send_message(message)
 
 		raise VMMonitorBugException(label)
