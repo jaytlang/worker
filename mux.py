@@ -7,6 +7,7 @@ import subprocess
 
 class Mux:
 	def _terminate(self):
+		print("terminating")
 		if not self._dead:
 			self._dead = True
 			message = Message(MessageOp.TERMINATE)
@@ -19,15 +20,19 @@ class Mux:
 			self._uplink_send(message)
 			return
 
+		print(f"trying to start child at {message.label()}")
+
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
 		subprocess.Popen(f"python3 {message.label()}", shell=True)
+		print("kicked off child...")
 
 		self._child_started = True
 		self._should_read(self._pipeserver_fd)
 
 	def _connect_child(self):
+		print("connecting to child")
 		self._should_not_read(self._pipeserver_fd)
 		self._pipeserver.accept()
 
@@ -37,13 +42,16 @@ class Mux:
 
 	def _handle_uplink_incoming(self, message):
 		if message.opcode() in [MessageOp.SENDLINE, MessageOp.SENDFILE]:
+			print("forwarding send to pipe")
 			self._pipeserver_send(message)
 
 		elif message.opcode() == MessageOp.HEARTBEAT:	
+			print("handling heartbeat on uplink")
 			response = Message(MessageOp.HEARTBEAT)
 			self._uplink_send(response)
 
 		else:
+			print("got unexpected message type on uplink")
 			label = b"_handle_uplink_incoming: received unexpected message type"
 			response = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
@@ -53,9 +61,11 @@ class Mux:
 		allow += [MessageOp.REQUESTFILE, MessageOp.TERMINATE, MessageOp.ERROR]
 
 		if message.opcode() in allow:
+			print("forwarding piped message through to uplink")
 			self._uplink_send(message)
 			return
 
+		print("message coming from worker is illegal, forwarding through to uplink")
 		label = b"_handle_pipeserver_incoming: program sent illegal message type"
 		response = Message(MessageOp.ERROR, label=label)
 		self._uplink_send(message)
