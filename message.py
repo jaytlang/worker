@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-# these are in bundled.h
+# these are in workerd.h
 class MessageOp(IntEnum):
 	SENDLINE = 1
 	REQUESTLINE = 2
@@ -9,6 +9,7 @@ class MessageOp(IntEnum):
 	TERMINATE = 5
 	ERROR = 6
 	ACK = 7
+	HEARTBEAT = 8
 
 MESSAGE_INCOMPLETE = -69
 

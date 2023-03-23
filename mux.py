@@ -10,22 +10,55 @@ class Mux:
 		if not self._dead:
 			self._dead = True
 			message = Message(TERMINATE)
-			self._uplink.add_to_send_buffer(message)
-			self._should_write(self._uplink)
+			self._uplink_send(message)
+
+	def _try_start_child(self, message):
+		if message.opcode != SENDFILE:
+			label = "_start_child: expected opening SENDFILE message"
+			message = Message(ERROR, label=label)
+			self._uplink_send(message)
+			return
+
+		with open(message.label, 'wb') as f:
+			f.write(message.file())
+
+		subprocess.Popen(f"python3 {message.label}")
+
+		self._child_started = True
+		self._should_read(self._pipeserver_fd)
+
+	def _connect_child(self):
+		self._should_not_read(self._pipeserver_fd)
+		self._uplink.accept()
+
+		self._pipeserver_fd = self._uplink.get_conn_fd()
+		self._should_read(self._pipeserver_fd)
+		self._child_connected = True
 
 	def _handle_uplink_incoming(self, message):
-		if not self._child_started:
-			if message.opcode != SENDFILE: return
+		if message.opcode() in [SENDLINE, SENDFILE]:
+			self._pipeserver_send(message)
 
-			with open(message.label, 'wb') as f:
-				f.write(message.file())
+		elif message.opcode() == HEARTBEAT:	
+			response = Message(HEARTBEAT)
+			self._uplink_send(response)
 
-			subprocess.Popen(f"python3 {message.label}")
-			self._child_started = True
+		else:
+			label = "_handle_uplink_incoming: received unexpected message type"
+			response = Message(ERROR, label=label)
+			self._uplink_send(message)
+
+	def _handle_pipeserver_incoming(self, message):
+		allow = [SENDLINE, REQUESTLINE, SENDFILE, REQUESTFILE, TERMINATE, ERROR]
+
+		if message.opcode() in allow:
+			self._uplink_send(message)
 			return
-		
-		# TODO: what other sorts of messages could come in?
 
+		label = "_handle_pipeserver_incoming: program sent illegal message type"
+		response = Message(ERROR, label=label)
+		self._uplink_send(message)
+			
 
 	def _select_loop(self):
 		while True:
@@ -37,15 +70,43 @@ class Mux:
 					except PeerClosedLinkException: self._terminate()
 
 					if message == MESSAGE_INCOMPLETE: continue
+
+					if not self._child_started:
+						self._try_start_child(message)
+						continue
+
 					self._handle_uplink_incoming(message)
 
-				if ready == self._
+				if ready == self._pipeserver_fd:
+					if not self._child_connected:
+						self._connect_child()
+						continue
+
+					self._handle_pipeserver_incoming(message)
+
+			for ready in wlist:
+				if ready == self._uplink_fd:
+					if self._uplink.flush_send_buffer():
+						self._should_not_write(self._uplink_fd)
+
+				if ready == self._pipeserver_fd:
+					if self._pipeserver.flush_send_buffer():
+						self._should_not_write(self._pipeserver_fd)
 
 
+	def _uplink_send(self, message):
+		self._uplink.add_to_send_buffer(message)
+		self._should_write(self._uplink)
+
+	def _pipeserver_send(self, message):
+		self._pipeserver.add_to_send_buffer(message)
+		self._should_write(self._pipeserver)
 
 	def __init__(self):
 		self._dead = False
 		self._child_started = False
+		self._child_connected = False
+
 		self._uplink = LinkClient()
 		self._pipeserver = PipeServer()
 
@@ -63,11 +124,3 @@ class Mux:
 	def _should_not_read(self, fd): if fd in self._rlist: self._rlist.remove(fd)
 
 	def run(self): self._select_loop()
-
-def start_child(self, execpath):
-
-def mux(self):
-	child_started = False
-	uplink = 
-	
-	subprocess.Popen(f"python3 {execpath}", shell=True)
