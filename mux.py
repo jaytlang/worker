@@ -29,7 +29,7 @@ class Mux:
 
 	def _connect_child(self):
 		self._should_not_read(self._pipeserver_fd)
-		self._uplink.accept()
+		self._pipeserver.accept()
 
 		self._pipeserver_fd = self._uplink.get_conn_fd()
 		self._should_read(self._pipeserver_fd)
