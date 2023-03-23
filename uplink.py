@@ -3,6 +3,7 @@ from link import *
 
 import socket
 import subprocess
+import time
 
 UPLINK_PORT = 8123
 
@@ -14,6 +15,11 @@ class Uplink(LinkClient):
 		host = subprocess.check_output(gethost, shell=True)
 		port = UPLINK_PORT
 
-		self._conn.connect((host, port))
-		self._conn.setblocking(False)
-		super().__init__()
+		while True:
+			try:
+				self._conn.connect((host, port))
+				self._conn.setblocking(False)
+				super().__init__()
+				break
+
+			except ConnectionRefusedError: time.sleep(1)

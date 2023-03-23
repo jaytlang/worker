@@ -1,0 +1,12 @@
+[Unit]
+Description=6.205 VM Sandbox Monitor
+Documentation=https://github.com/jaytlang/worker
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/fpga/worker/worker.py
+User=fpga
+Group=fpga
+
+[Install]
+WantedBy=default.target
