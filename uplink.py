@@ -11,7 +11,7 @@ class Uplink(LinkClient):
 		self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 		gethost = "route -n | grep '^0.0.0.0' | tr -s ' ' | cut -f 2 -d ' '"
-		host = subprocess.check_output(gethost, shell=True, text=True)
+		host = subprocess.check_output(gethost, shell=True)
 		port = UPLINK_PORT
 
 		self._conn.connect((host, port))
