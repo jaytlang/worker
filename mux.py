@@ -79,15 +79,14 @@ class Mux:
 					self._handle_uplink_incoming(message)
 
 				if ready == self._pipeserver_fd:
+					if not self._child_connected:
+						self._connect_child()
+						continue
+						
 					try: message = self._pipeserver.receive_message()
 					except PeerClosedLinkException: self._terminate()
 
 					if message == MESSAGE_INCOMPLETE: continue
-
-					if not self._child_connected:
-						self._connect_child()
-						continue
-
 					self._handle_pipeserver_incoming(message)
 
 			for ready in wlist:
