@@ -8,7 +8,7 @@ class Link:
 	def receive_message(self, mtu=1500):
 		while True:
 			try: received = self._conn.recv(mtu)
-			except TimeoutError: return MESSAGE_INCOMPLETE
+			except BlockingIOError: return MESSAGE_INCOMPLETE
 
 			if len(received) == 0: raise PeerClosedLinkException
 
@@ -29,7 +29,7 @@ class Link:
 
 			while len(writebuffer) > 0:
 				try: sent = self._conn.send(writebuffer)
-				except TimeoutError: return False
+				except BlockingIOError: return False
 
 				writebuffer = writebuffer[sent:]
 
