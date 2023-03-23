@@ -36,7 +36,7 @@ class Mux:
 		self._should_not_read(self._pipeserver_fd)
 		self._pipeserver.accept()
 
-		self._pipeserver_fd = self._uplink.get_conn_fd()
+		self._pipeserver_fd = self._pipeserver.get_conn_fd()
 		self._should_read(self._pipeserver_fd)
 		self._child_connected = True
 
@@ -73,10 +73,12 @@ class Mux:
 
 	def _select_loop(self):
 		while True:
+			print("select")
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
 			
 			for ready in rlist:
 				if ready == self._uplink_fd:
+					print("reading from uplink fd")
 					try: message = self._uplink.receive_message()
 					except PeerClosedLinkException: self._terminate()
 
@@ -89,6 +91,7 @@ class Mux:
 					self._handle_uplink_incoming(message)
 
 				if ready == self._pipeserver_fd:
+					print("reading from pipeserver fd")
 					if not self._child_connected:
 						self._connect_child()
 						continue
@@ -101,10 +104,12 @@ class Mux:
 
 			for ready in wlist:
 				if ready == self._uplink_fd:
+					print("writing to uplink fd")
 					if self._uplink.flush_send_buffer():
 						self._should_not_write(self._uplink_fd)
 
 				if ready == self._pipeserver_fd:
+					print("writing to pipe fd")
 					if self._pipeserver.flush_send_buffer():
 						self._should_not_write(self._pipeserver_fd)
 
