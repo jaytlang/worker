@@ -13,16 +13,16 @@ class Mux:
 			self._uplink_send(message)
 
 	def _try_start_child(self, message):
-		if message.opcode != MessageOp.SENDFILE:
-			label = "_start_child: expected opening SENDFILE message"
+		if message.opcode() != MessageOp.SENDFILE:
+			label = b"_start_child: expected opening SENDFILE message"
 			message = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
 			return
 
-		with open(message.label, 'wb') as f:
+		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
-		subprocess.Popen(f"python3 {message.label}")
+		subprocess.Popen(f"python3 {message.label()}")
 
 		self._child_started = True
 		self._should_read(self._pipeserver_fd)
@@ -44,7 +44,7 @@ class Mux:
 			self._uplink_send(response)
 
 		else:
-			label = "_handle_uplink_incoming: received unexpected message type"
+			label = b"_handle_uplink_incoming: received unexpected message type"
 			response = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
 
@@ -56,7 +56,7 @@ class Mux:
 			self._uplink_send(message)
 			return
 
-		label = "_handle_pipeserver_incoming: program sent illegal message type"
+		label = b"_handle_pipeserver_incoming: program sent illegal message type"
 		response = Message(MessageOp.ERROR, label=label)
 		self._uplink_send(message)
 			
