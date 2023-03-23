@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("worker")
+
 from message import *
 from pipe import *
 

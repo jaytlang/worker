@@ -102,11 +102,11 @@ class Mux:
 
 	def _uplink_send(self, message):
 		self._uplink.add_to_send_buffer(message)
-		self._should_write(self._uplink)
+		self._should_write(self._uplink_fd)
 
 	def _pipeserver_send(self, message):
 		self._pipeserver.add_to_send_buffer(message)
-		self._should_write(self._pipeserver)
+		self._should_write(self._pipeserver_fd)
 
 	def __init__(self):
 		self._dead = False
