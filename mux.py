@@ -107,7 +107,7 @@ class Mux:
 		self._child_started = False
 		self._child_connected = False
 
-		self._uplink = LinkClient()
+		self._uplink = Uplink()
 		self._pipeserver = PipeServer()
 
 		self._uplink_fd = self._uplink.get_conn_fd()
@@ -118,9 +118,16 @@ class Mux:
 
 		self._should_read(self._uplink_fd)
 
-	def _should_write(self, fd): if fd not in self._wlist: self._wlist.append(fd)
-	def _should_not_write(self, fd): if fd in self._wlist: self._wlist.remove(fd) 
-	def _should_read(self, fd): if fd not in self._rlist: self._rlist.append(fd)
-	def _should_not_read(self, fd): if fd in self._rlist: self._rlist.remove(fd)
+	def _should_write(self, fd):
+		if fd not in self._wlist: self._wlist.append(fd)
+
+	def _should_not_write(self, fd):
+		if fd in self._wlist: self._wlist.remove(fd) 
+
+	def _should_read(self, fd):
+		if fd not in self._rlist: self._rlist.append(fd)
+
+	def _should_not_read(self, fd):
+		if fd in self._rlist: self._rlist.remove(fd)
 
 	def run(self): self._select_loop()

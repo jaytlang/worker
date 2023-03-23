@@ -16,7 +16,7 @@ class Link:
 
 			message = Message.from_bytes(self._readbuffer)
 
-			if message = MESSAGE_INCOMPLETE: continue
+			if message == MESSAGE_INCOMPLETE: continue
 			self._readbuffer = bytes()
 			return message
 

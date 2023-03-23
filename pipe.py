@@ -17,7 +17,7 @@ class PipeServer(LinkServer):
 # not used by folks which need non-blocking code
 class PipeClient:
 	def __init__(self):
-		self._conn = socket.socket_socket.AF_UNIX, socket.SOCK_STREAM)
+		self._conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 		self._conn.connect(PIPE_PATH)
 
 	def send_message(self, message):
