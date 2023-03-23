@@ -14,7 +14,7 @@ class VMMonitorBugException(Exception): pass
 def print(line):
 	global pipe
 
-	message = Message(MessageOp.SENDLINE, label=line)
+	message = Message(MessageOp.SENDLINE, label=bytes(line, encoding='ascii'))
 	pipe.send_message(message)
 	
 def readline():
