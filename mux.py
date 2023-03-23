@@ -22,7 +22,7 @@ class Mux:
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
-		subprocess.Popen(f"python3 {message.label()}")
+		subprocess.Popen(f"python3 {message.label()}", shell=True)
 
 		self._child_started = True
 		self._should_read(self._pipeserver_fd)
