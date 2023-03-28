@@ -6,6 +6,7 @@ import os
 import select
 import subprocess
 import sys
+import traceback
 
 class Mux:
 	def _terminate(self):
