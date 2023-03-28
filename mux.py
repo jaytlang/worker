@@ -22,14 +22,11 @@ class Mux:
 			self._uplink_send(message)
 			return
 
-		print(f"trying to start child at {message.label()}")
-
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
 		pid = fork()
 		if pid == 0:
-			print("child")
 			f = open(message.label(), 'r')
 
 			from worker.api import VMMonitorBugException, pipe
@@ -109,6 +106,7 @@ class Mux:
 
 						if not self._child_started:
 							self._try_start_child(message)
+							print("kicked off child")
 							continue
 
 						self._handle_uplink_incoming(message)
