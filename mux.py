@@ -10,7 +10,9 @@ class Mux:
 		if not self._dead:
 			self._dead = True
 			print("terminating")
-			message = Message(MessageOp.TERMINATE)
+
+			label = "running program unexpectedly stopped responding"
+			message = Message(MessageOp.ERROR, label=label)
 			self._uplink_send(message)
 
 	def _try_start_child(self, message):

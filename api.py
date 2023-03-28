@@ -77,3 +77,22 @@ def load(filename, mode):
 		f.write(response.file())
 
 	return open(response.label(), mode)
+
+def terminate():
+	global pipe
+
+	message = Message(MessageOp.TERMINATE)
+	pipe.send_message(message)
+
+def error(why):
+	global pipe
+	
+	message = Message(MessageOp.ERROR, label=why)
+	pipe.send_message()
+
+	response = pipe.receive_message()
+	if response.opcode() != MessageOp.ACK:
+		label = "print: missing ack from engine"
+		error = Message(MessageOp.ERROR, label=label)
+		pipe.send_message(message)
+
