@@ -30,8 +30,8 @@ class Mux:
 		if pid == 0:
 			f = open(message.label(), 'r')
 
-			from worker.api import VMMonitorBugException, pipe
-			from worker.api import print, readline, load, save, terminate, error
+			from api import VMMonitorBugException, pipe
+			from api import print, readline, load, save, terminate, error
 
 			try: exec(f.read())
 			except SyntaxError as err:
@@ -47,7 +47,7 @@ class Mux:
 
 			else: sys.exit(0)
 
-			worker.api.error(f"{error_class} at line {line_number}: {detail}")
+			error(f"{error_class} at line {line_number}: {detail}")
 			sys.exit(1)
 		
 		self._child_started = True
