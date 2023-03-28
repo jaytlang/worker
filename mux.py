@@ -4,6 +4,7 @@ from uplink import *
 
 import select
 import subprocess
+import sys
 
 class Mux:
 	def _terminate(self):
@@ -26,9 +27,30 @@ class Mux:
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
-		subprocess.Popen(f"python3 {message.label()}", shell=True)
-		print("kicked off child...")
+		pid = fork()
+		if pid == 0:
+			print("child")
+			f = open(message.label(), 'r')
 
+			from worker.api import *
+
+			try: exec(f.read())
+			except SyntaxError as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				line_number = err.lineno
+
+			except Exception as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				cl, exc, tb = sys.exc_info()
+				line_number = traceback.extract_tb(tb)[-1][1]
+
+			else: sys.exit(0)
+
+			error(f"{error_class} at line {line_number}: {detail}")
+			sys.exit(1)
+		
 		self._child_started = True
 		self._should_read(self._pipeserver_fd)
 
