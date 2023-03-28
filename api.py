@@ -47,7 +47,7 @@ def save(filename):
 
 	with open(filename, 'rb') as f:
 		content = f.read()
-		message = Message(MessageOp.SENDFILE, label=filename, file=content)
+		message = Message(MessageOp.SENDFILE, label=bytes(filename, encoding='ascii'), file=content)
 		pipe.send_message(message)
 
 	response = pipe.receive_message()
@@ -63,12 +63,12 @@ def load(filename, mode):
 	if os.path.exists(filename):
 		return open(filename, mode)
 
-	message = Message(MessageOp.REQUESTFILE, label=filename)
+	message = Message(MessageOp.REQUESTFILE, label=bytes(filename, encoding='ascii'))
 	pipe.send_message(message)
 
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.SENDFILE:
-		label = "load: got unexpected response from engine"
+		label = b"load: got unexpected response from engine"
 		error = Message(MessageOp.ERROR, label=label)
 		pipe.send_message(message)
 
@@ -88,7 +88,7 @@ def terminate():
 def error(why):
 	global pipe
 	
-	message = Message(MessageOp.ERROR, label=why)
+	message = Message(MessageOp.ERROR, label=bytes(why, encoding='ascii'))
 	pipe.send_message(message)
 
 	response = pipe.receive_message()
