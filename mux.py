@@ -2,6 +2,7 @@ from message import *
 from pipe import *
 from uplink import *
 
+import os
 import select
 import subprocess
 import sys
@@ -25,7 +26,7 @@ class Mux:
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
-		pid = fork()
+		pid = os.fork()
 		if pid == 0:
 			f = open(message.label(), 'r')
 
