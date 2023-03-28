@@ -7,9 +7,9 @@ import subprocess
 
 class Mux:
 	def _terminate(self):
-		print("terminating")
 		if not self._dead:
 			self._dead = True
+			print("terminating")
 			message = Message(MessageOp.TERMINATE)
 			self._uplink_send(message)
 
@@ -79,16 +79,18 @@ class Mux:
 			for ready in rlist:
 				if ready == self._uplink_fd:
 					print("reading from uplink fd")
-					try: message = self._uplink.receive_message()
-					except PeerClosedLinkException: self._terminate()
+					try:
+						message = self._uplink.receive_message()
+						if message == MESSAGE_INCOMPLETE: continue
 
-					if message == MESSAGE_INCOMPLETE: continue
+						if not self._child_started:
+							self._try_start_child(message)
+							continue
 
-					if not self._child_started:
-						self._try_start_child(message)
-						continue
+						self._handle_uplink_incoming(message)
 
-					self._handle_uplink_incoming(message)
+					except PeerClosedLinkException:
+						self._terminate()
 
 				if ready == self._pipeserver_fd:
 					print("reading from pipeserver fd")
@@ -96,11 +98,15 @@ class Mux:
 						self._connect_child()
 						continue
 						
-					try: message = self._pipeserver.receive_message()
-					except PeerClosedLinkException: self._terminate()
+					try:
+						message = self._pipeserver.receive_message()
 
-					if message == MESSAGE_INCOMPLETE: continue
-					self._handle_pipeserver_incoming(message)
+						if message == MESSAGE_INCOMPLETE: continue
+						self._handle_pipeserver_incoming(message)
+
+					except PeerClosedLinkException:
+						self._terminate()
+
 
 			for ready in wlist:
 				if ready == self._uplink_fd:
