@@ -6,6 +6,7 @@ from message import *
 from pipe import *
 
 import os
+import sys
 
 pipe = PipeClient()
 
@@ -88,11 +89,10 @@ def error(why):
 	global pipe
 	
 	message = Message(MessageOp.ERROR, label=why)
-	pipe.send_message()
+	pipe.send_message(message)
 
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.ACK:
 		label = "print: missing ack from engine"
 		error = Message(MessageOp.ERROR, label=label)
 		pipe.send_message(message)
-
