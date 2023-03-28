@@ -16,6 +16,14 @@ def print(line):
 
 	message = Message(MessageOp.SENDLINE, label=bytes(line, encoding='ascii'))
 	pipe.send_message(message)
+
+	response = pipe.receive_message()
+	if response.opcode() != MessageOp.ACK:
+		label = "print: missing ack from engine"
+		error = Message(MessageOp.ERROR, label=label)
+		pipe.send_message(message)
+
+		raise VMMonitorBugException(label)
 	
 def readline():
 	global pipe
@@ -40,6 +48,13 @@ def save(filename):
 		content = f.read()
 		message = Message(MessageOp.SENDFILE, label=filename, file=content)
 		pipe.send_message(message)
+
+	response = pipe.receive_message()
+	if response.opcode() != MessageOp.ACK:
+		label = "print: missing ack from engine"
+		error = Message(MessageOp.ERROR, label=label)
+		pipe.send_message(message)
+
 
 def load(filename, mode):
 	global pipe
