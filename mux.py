@@ -60,7 +60,6 @@ class Mux:
 			sys.exit(1)
 		
 		self._child_started = True
-		print("kicked off child")
 		self._should_read(self._pipeserver_fd)
 
 	def _connect_child(self):
@@ -118,6 +117,7 @@ class Mux:
 						if message == MESSAGE_INCOMPLETE: continue
 
 						if not self._child_started:
+							print("thinking about starting child")
 							self._try_start_child(message)
 							continue
 
