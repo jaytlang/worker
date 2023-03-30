@@ -77,7 +77,7 @@ class Message:
 		except ValueError:
 			raise ValueError(f"invalid opcode {opcode} received")
 
-		if opcode in [MessageOp.REQUESTLINE, MessageOp.TERMINATE, MessageOp.ACK]:
+		if opcode in [MessageOp.REQUESTLINE, MessageOp.TERMINATE, MessageOp.ACK, MessageOp.HEARTBEAT]:
 			return cls(opcode)
 
 		try: label = MessageField.from_bytes(bytes[1:])
