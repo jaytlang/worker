@@ -21,9 +21,6 @@ def print(line):
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.ACK:
 		label = "print: missing ack from engine"
-		error = Message(MessageOp.ERROR, label=label)
-		pipe.send_message(message)
-
 		raise VMMonitorBugException(label)
 	
 def readline():
@@ -35,9 +32,6 @@ def readline():
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.SENDLINE:
 		label = "readline: got unexpected response from engine"
-		error = Message(MessageOp.ERROR, label=label)
-		pipe.send_message(message)
-
 		raise VMMonitorBugException(label)
 		
 	return response.label()
@@ -53,9 +47,7 @@ def save(filename):
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.ACK:
 		label = "print: missing ack from engine"
-		error = Message(MessageOp.ERROR, label=label)
-		pipe.send_message(message)
-
+		raise VMMonitorBugException(label)
 
 def load(filename, mode):
 	global pipe
@@ -68,10 +60,7 @@ def load(filename, mode):
 
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.SENDFILE:
-		label = b"load: got unexpected response from engine"
-		error = Message(MessageOp.ERROR, label=label)
-		pipe.send_message(message)
-
+		label = "load: got unexpected response from engine"
 		raise VMMonitorBugException(label)
 
 	with open(response.label(), 'wb') as f:
@@ -94,5 +83,4 @@ def error(why):
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.ACK:
 		label = "print: missing ack from engine"
-		error = Message(MessageOp.ERROR, label=label)
-		pipe.send_message(message)
+		raise VMMonitorBugException(label)
