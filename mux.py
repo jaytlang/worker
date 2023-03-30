@@ -147,7 +147,7 @@ class Mux:
 				if ready == self._pipeserver_fd:
 					print("writing to pipe fd")
 					if self._pipeserver.flush_send_buffer():
-						nw_append(self._pipeserver_fd)
+						nw.append(self._pipeserver_fd)
 
 			for dontwrite in nw: self._should_not_write(dontwrite)
 
