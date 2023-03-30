@@ -17,6 +17,8 @@ class Mux:
 			message = Message(MessageOp.TERMINATE)
 			self._uplink_send(message)
 
+			self._rlist = []
+
 	def _try_start_child(self, message):
 		if message.opcode() != MessageOp.SENDFILE:
 			label = b"_start_child: expected opening SENDFILE message"
@@ -98,6 +100,8 @@ class Mux:
 		while True:
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
 			print(f"select {self._rlist} {self._wlist} = {rlist} {wlist}")
+
+			nw = []
 			
 			for ready in rlist:
 				if ready == self._uplink_fd:
@@ -115,7 +119,6 @@ class Mux:
 
 					except PeerClosedLinkException:
 						print("uplink fd closed")
-						self._should_not_read(self._uplink_fd)
 						self._terminate()
 
 				if ready == self._pipeserver_fd:
@@ -132,7 +135,6 @@ class Mux:
 
 					except PeerClosedLinkException:
 						print("pipeserver fd closed")
-						self._should_not_read(self._pipeserver_fd)
 						self._terminate()
 
 
@@ -140,13 +142,14 @@ class Mux:
 				if ready == self._uplink_fd:
 					print("writing to uplink fd")
 					if self._uplink.flush_send_buffer():
-						self._should_not_write(self._uplink_fd)
+						nw.append(self._uplink_fd)
 
 				if ready == self._pipeserver_fd:
 					print("writing to pipe fd")
 					if self._pipeserver.flush_send_buffer():
-						self._should_not_write(self._pipeserver_fd)
+						nw_append(self._pipeserver_fd)
 
+			for dontwrite in nw: self._should_not_write(dontwrite)
 
 	def _uplink_send(self, message):
 		self._uplink.add_to_send_buffer(message)
