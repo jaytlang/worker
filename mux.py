@@ -20,6 +20,12 @@ class Mux:
 			self._rlist = []
 
 	def _try_start_child(self, message):
+		if message.opcode() == MessageOp.HEARTBEAT:	
+			print("no start yet, handling heartbeat on uplink")
+			response = Message(MessageOp.HEARTBEAT)
+			self._uplink_send(response)
+			return
+
 		if message.opcode() != MessageOp.SENDFILE:
 			label = b"_start_child: expected opening SENDFILE message"
 			message = Message(MessageOp.ERROR, label=label)
