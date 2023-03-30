@@ -114,6 +114,7 @@ class Mux:
 						self._handle_uplink_incoming(message)
 
 					except PeerClosedLinkException:
+						print("uplink fd closed")
 						self._terminate()
 
 				if ready == self._pipeserver_fd:
@@ -129,6 +130,7 @@ class Mux:
 						self._handle_pipeserver_incoming(message)
 
 					except PeerClosedLinkException:
+						print("pipeserver fd closed")
 						self._terminate()
 
 
