@@ -95,8 +95,8 @@ class Mux:
 			
 
 	def _select_loop(self):
-		while True:
-			print("select")
+		while not self._dead:
+			print(f"select {self._rlist} {self._wlist}")
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
 			
 			for ready in rlist:
