@@ -21,7 +21,7 @@ class Mux:
 
 	def _try_start_child(self, message):
 		if message.opcode() == MessageOp.HEARTBEAT:	
-			print("no start yet, handling heartbeat on uplink")
+			# bail out early
 			response = Message(MessageOp.HEARTBEAT)
 			self._uplink_send(response)
 			return
