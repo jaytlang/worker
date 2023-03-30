@@ -96,8 +96,8 @@ class Mux:
 
 	def _select_loop(self):
 		while True:
-			print(f"select {self._rlist} {self._wlist}")
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
+			print(f"select {self._rlist} {self._wlist} = {rlist} {wlist}")
 			
 			for ready in rlist:
 				if ready == self._uplink_fd:
