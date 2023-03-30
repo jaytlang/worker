@@ -115,6 +115,7 @@ class Mux:
 
 					except PeerClosedLinkException:
 						print("uplink fd closed")
+						self._should_not_read(self._uplink_fd)
 						self._terminate()
 
 				if ready == self._pipeserver_fd:
@@ -131,6 +132,7 @@ class Mux:
 
 					except PeerClosedLinkException:
 						print("pipeserver fd closed")
+						self._should_not_read(self._pipeserver_fd)
 						self._terminate()
 
 
