@@ -5,7 +5,7 @@ Documentation=https://github.com/jaytlang/worker
 [Service]
 Type=simple
 WorkingDirectory=/home/fpga
-ExecStart=/usr/bin/python3 /home/fpga/worker/worker.py
+ExecStart=/usr/bin/python3 -u /home/fpga/worker/worker.py
 User=fpga
 Group=fpga
 
