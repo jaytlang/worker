@@ -39,8 +39,8 @@ class Mux:
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
-		p = subprocess.check_output("python3 ${bundle} -xsf {message.label}", shell=True)
-		if p.returncode < 0:
+		try: p = subprocess.check_output("python3 ${bundle} -xsf {message.label()}", shell=True, check=False)
+		except subprocess.CalledProcessError:
 			response = Message(MessageOp.ERROR, label=b"you passed an invalid bundle to us! you dirty hacker.")
 			self._uplink_send(response)
 			self._terminate()
