@@ -5,11 +5,10 @@ class MessageOp(IntEnum):
 	SENDLINE = 1
 	REQUESTLINE = 2
 	SENDFILE = 3
-	REQUESTFILE = 4
-	TERMINATE = 5
-	ERROR = 6
-	ACK = 7
-	HEARTBEAT = 8
+	TERMINATE = 4
+	ERROR = 5
+	ACK = 6
+	HEARTBEAT = 7
 
 MESSAGE_INCOMPLETE = -69
 
@@ -83,7 +82,7 @@ class Message:
 		try: label = MessageField.from_bytes(bytes[1:])
 		except IndexError: return MESSAGE_INCOMPLETE
 
-		if opcode in [MessageOp.SENDLINE, MessageOp.REQUESTFILE, MessageOp.ERROR]:
+		if opcode in [MessageOp.SENDLINE, MessageOp.ERROR]:
 			return cls(opcode, label=label.content())
 
 		try:

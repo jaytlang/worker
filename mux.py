@@ -2,6 +2,10 @@ from message import *
 from pipe import *
 from uplink import *
 
+# CHANGEME: where is the bundle executable located?
+bundle = "/home/fpga/bundle/bundle.py"
+buildfilename = "build.py"
+
 import os
 import select
 import subprocess
@@ -35,9 +39,20 @@ class Mux:
 		with open(message.label(), 'wb') as f:
 			f.write(message.file())
 
+		p = subprocess.check_output("python3 ${bundle} -xsf {message.label}", shell=True)
+		if p.returncode < 0:
+			response = Message(MessageOp.ERROR, label=b"you passed an invalid bundle to us! you dirty hacker.")
+			self._uplink_send(response)
+			self._terminate()
+			return
+
 		pid = os.fork()
 		if pid == 0:
-			f = open(message.label(), 'r')
+			try: f = open(buildfilename, 'r')
+			except FileNotFoundError:
+				response = Message(MessageOp.ERROR, label=b"no build.py found!")
+				self._uplink_send(message)
+				return
 
 			from api import VMMonitorBugException, pipe
 			from api import print, readline, load, save, terminate, error
@@ -89,7 +104,7 @@ class Mux:
 
 	def _handle_pipeserver_incoming(self, message):
 		allow = [MessageOp.SENDLINE, MessageOp.REQUESTLINE, MessageOp.SENDFILE]
-		allow += [MessageOp.REQUESTFILE, MessageOp.TERMINATE, MessageOp.ERROR]
+		allow += [MessageOp.TERMINATE, MessageOp.ERROR]
 
 		if message.opcode() in allow:
 			print("forwarding piped message through to uplink")

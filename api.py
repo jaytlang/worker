@@ -49,25 +49,6 @@ def save(filename):
 		label = "print: missing ack from engine"
 		raise VMMonitorBugException(label)
 
-def load(filename, mode):
-	global pipe
-
-	if os.path.exists(filename):
-		return open(filename, mode)
-
-	message = Message(MessageOp.REQUESTFILE, label=bytes(filename, encoding='ascii'))
-	pipe.send_message(message)
-
-	response = pipe.receive_message()
-	if response.opcode() != MessageOp.SENDFILE:
-		label = "load: got unexpected response from engine"
-		raise VMMonitorBugException(label)
-
-	with open(response.label(), 'wb') as f:
-		f.write(response.file())
-
-	return open(response.label(), mode)
-
 def terminate():
 	global pipe
 
