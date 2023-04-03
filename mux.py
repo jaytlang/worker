@@ -55,7 +55,7 @@ class Mux:
 				return
 
 			from api import VMMonitorBugException, pipe
-			from api import print, readline, load, save, terminate, error
+			from api import print, readline, save, terminate, error
 
 			try: exec(f.read())
 			except SyntaxError as err:
