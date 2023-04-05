@@ -7,6 +7,7 @@ bundle = "/home/fpga/bundle/bundle.py"
 buildfilename = "build.py"
 
 import os
+import runpy
 import select
 import subprocess
 import sys
@@ -57,7 +58,17 @@ class Mux:
 			from api import VMMonitorBugException, pipe
 			from api import print, readline, save, terminate, error
 
-			try: exec(f.read())
+			init = {}
+			init["VMMonitorBugException"] = VMMonitorBugException
+			init["pipe"] = pipe
+
+			init["print"] = print
+			init["readline"] = readline
+			init["save"] = save
+			init["terminate"] = terminate
+			init["error"] = error
+
+			try: runpy.run_path(buildfilename, init_globals=init)
 			except SyntaxError as err:
 				error_class = err.__class__.__name__
 				detail = err.args[0]
