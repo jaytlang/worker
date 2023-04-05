@@ -57,7 +57,7 @@ class Mux:
 			from api import VMMonitorBugException, pipe
 			from api import print, readline, save, terminate, error
 
-			try: exec(f.read())
+			try: exec(f.read(), globals())
 			except SyntaxError as err:
 				error_class = err.__class__.__name__
 				detail = err.args[0]
