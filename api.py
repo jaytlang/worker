@@ -15,6 +15,9 @@ class VMMonitorBugException(Exception): pass
 def print(line):
 	global pipe
 
+	if type(line) is not str:
+		raise TypeError("print only takes string arguments")
+
 	message = Message(MessageOp.SENDLINE, label=bytes(line, encoding='ascii'))
 	pipe.send_message(message)
 
@@ -39,6 +42,9 @@ def readline():
 def save(filename):
 	global pipe
 
+	if type(filename) is not str:
+		raise TypeError("save only takes string arguments")
+
 	with open(filename, 'rb') as f:
 		content = f.read()
 		message = Message(MessageOp.SENDFILE, label=bytes(filename, encoding='ascii'), file=content)
@@ -57,6 +63,9 @@ def terminate():
 
 def error(why):
 	global pipe
+
+	if type(why) is not str:
+		raise TypeError("error only takes string arguments")
 	
 	message = Message(MessageOp.ERROR, label=bytes(why, encoding='ascii'))
 	pipe.send_message(message)
