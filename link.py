@@ -10,7 +10,7 @@ class Link:
 			try: received = self._conn.recv(mtu)
 			except BlockingIOError: return MESSAGE_INCOMPLETE
 
-			print(f"received {len(received)} bytes: {received}")
+			print(f"received {len(received)} bytes")
 			if len(received) == 0: raise PeerClosedLinkException
 
 			self._readbuffer += received
