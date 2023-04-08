@@ -61,6 +61,9 @@ def terminate():
 	message = Message(MessageOp.TERMINATE)
 	pipe.send_message(message)
 
+	# see ya
+	sys.exit(0)
+
 def error(why):
 	global pipe
 
