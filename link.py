@@ -5,7 +5,7 @@ import socket
 class PeerClosedLinkException(Exception): pass
 
 class Link:
-	def receive_message(self, mtu=1500):
+	def receive_message(self, mtu=1048576):
 		while True:
 			try: received = self._conn.recv(mtu)
 			except BlockingIOError: return MESSAGE_INCOMPLETE

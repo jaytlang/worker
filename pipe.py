@@ -23,7 +23,7 @@ class PipeClient:
 	def send_message(self, message):
 		self._conn.sendall(message.to_bytes())
 
-	def receive_message(self, mtu=1500):
+	def receive_message(self, mtu=1048576):
 		receivebuf = bytes()
 		while True:
 			receivebuf += self._conn.recv(mtu)	
