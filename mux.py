@@ -23,12 +23,16 @@ class Mux:
 			self._uplink_send(message)
 
 	def _try_start_child(self, message):
+		# bail out early
 		if message.opcode() == MessageOp.HEARTBEAT:	
-			# bail out early
 			response = Message(MessageOp.HEARTBEAT)
 			self._uplink_send(response)
 			return
 
+		elif message.opcode() == MessageOp.ACK:
+			if self._uplink.last_opcode_sent() == MessageOp.HEARTBEAT: return
+
+		# ok, no more excuses
 		if message.opcode() != MessageOp.SENDFILE:
 			label = b"_start_child: expected opening SENDFILE message"
 			message = Message(MessageOp.ERROR, label=label)
