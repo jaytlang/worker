@@ -133,6 +133,8 @@ class Mux:
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
 			print(f"select {self._rlist} {self._wlist} = {rlist} {wlist}")
 
+			nw = []
+
 			for ready in rlist:
 				if ready == self._uplink_fd:
 					print("reading from uplink fd")
