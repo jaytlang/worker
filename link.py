@@ -3,7 +3,7 @@ from message import *
 import socket
 
 class PeerClosedLinkException(Exception): pass
-class PrematureSendException: pass
+class PrematureSendException(Exception): pass
 
 class Link:
 	def receive_message(self, mtu=1048576):
@@ -24,20 +24,23 @@ class Link:
 			return message
 
 	def add_to_send_buffer(self, message):
-		self._messagequeue.append(message.to_bytes())	
+		self._messagequeue.append(message)	
 
 	def flush_send_buffer(self):
+		# safety glasses on
 		if not self.send_buffer_ready():
 			raise PrematureSendException
 
-		writebuffer = self._messagequeue[0]
+		writebuffer = self._messagequeue[0].to_bytes()
+
 		while len(writebuffer) > 0:
 			try: sent = self._conn.send(writebuffer)
 			except BlockingIOError: return False
 
 			writebuffer = writebuffer[sent:]
 
-		self._messagequeue.pop(0)
+		sent = self._messagequeue.pop(0)
+		self._last_type_sent = sent.opcode()
 		self._pending_response = True
 		return True
 
@@ -51,10 +54,13 @@ class Link:
 		if self._conn is not None: return self._conn.fileno()
 		else: return None
 
+	def last_opcode_sent(self): return self._last_type_sent
+
 	def __init__(self):
 		# be sure to initialize self._conn
 		self._pending_response = False
 		self._readbuffer = bytes()
+		self._last_type_sent = None
 		self._messagequeue = []
 
 class LinkServer(Link):

@@ -96,6 +96,9 @@ class Mux:
 		self._child_connected = True
 
 	def _handle_uplink_incoming(self, message):
+		if message.opcode == MessageOp.ACK:
+			if self._uplink.last_opcode_sent == MessageOp.HEARTBEAT: return
+
 		if message.opcode() in [MessageOp.SENDLINE, MessageOp.SENDFILE, MessageOp.ACK]:
 			print("forwarding send to pipe")
 			self._pipeserver_send(message)
