@@ -3,6 +3,7 @@ from message import *
 import socket
 
 class PeerClosedLinkException(Exception): pass
+class PrematureSendException: pass
 
 class Link:
 	def receive_message(self, mtu=1048576):
@@ -19,24 +20,32 @@ class Link:
 
 			if message == MESSAGE_INCOMPLETE: continue
 			self._readbuffer = bytes()
+			self._pending_response = False
 			return message
 
 	def add_to_send_buffer(self, message):
 		self._messagequeue.append(message.to_bytes())	
 
 	def flush_send_buffer(self):
-		while self._messagequeue:
-			writebuffer = self._messagequeue[0]
+		if not self.send_buffer_ready():
+			raise PrematureSendException
 
-			while len(writebuffer) > 0:
-				try: sent = self._conn.send(writebuffer)
-				except BlockingIOError: return False
+		writebuffer = self._messagequeue[0]
+		while len(writebuffer) > 0:
+			try: sent = self._conn.send(writebuffer)
+			except BlockingIOError: return False
 
-				writebuffer = writebuffer[sent:]
+			writebuffer = writebuffer[sent:]
 
-			self._messagequeue.pop(0)
-
+		self._messagequeue.pop(0)
+		self._pending_response = True
 		return True
+
+	# only one message can fly at a time due to how
+	# messages work...
+	def send_buffer_ready(self):
+		if not self._messagequeue: return False
+		else: return not self._pending_response
 
 	def get_conn_fd(self):
 		if self._conn is not None: return self._conn.fileno()
@@ -44,6 +53,7 @@ class Link:
 
 	def __init__(self):
 		# be sure to initialize self._conn
+		self._pending_response = False
 		self._readbuffer = bytes()
 		self._messagequeue = []
 

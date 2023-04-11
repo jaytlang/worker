@@ -133,8 +133,6 @@ class Mux:
 			rlist, wlist, xlist = select.select(self._rlist, self._wlist, [])
 			print(f"select {self._rlist} {self._wlist} = {rlist} {wlist}")
 
-			nw = []
-			
 			for ready in rlist:
 				if ready == self._uplink_fd:
 					print("reading from uplink fd")
@@ -183,13 +181,16 @@ class Mux:
 
 			for dontwrite in nw: self._should_not_write(dontwrite)
 
+			if self._uplink.send_buffer_ready():
+				self._should_write(self._uplink_fd)
+			if self._pipeserver.send_buffer_ready():
+				self._should_write(self._pipeserver_fd)
+
 	def _uplink_send(self, message):
 		self._uplink.add_to_send_buffer(message)
-		self._should_write(self._uplink_fd)
 
 	def _pipeserver_send(self, message):
 		self._pipeserver.add_to_send_buffer(message)
-		self._should_write(self._pipeserver_fd)
 
 	def __init__(self):
 		self._dead = False
