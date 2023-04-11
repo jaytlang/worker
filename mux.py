@@ -83,7 +83,6 @@ class Mux:
 			error(f"{error_class} at line {line_number}: {detail}")
 			sys.exit(1)
 		
-		print("actually started child")
 		self._child_started = True
 		self._should_read(self._pipeserver_fd)
 
