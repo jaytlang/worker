@@ -23,6 +23,7 @@ class MessageField:
 			raise IndexError("not enough bytes for message field length")
 
 		length = int.from_bytes(bytes[0:8], "big")
+		print(f"forming message field with length {length} out of {len(bytes)} bytes")
 		if len(bytes) < 8 + length:
 			raise IndexError(f"not enough bytes for message field body")
 
