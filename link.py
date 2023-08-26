@@ -31,15 +31,18 @@ class Link:
 		if not self.send_buffer_ready():
 			raise PrematureSendException
 
-		try: writebuffer = self._messagequeue[0].to_bytes()
-		except AttributeError: writebuffer = self._messagequeue[0]
+		writebuffer = self._messagequeue[0].to_bytes()
+		if self._temp_writebuffer is not None:
+			writebuffer = self._temp_writebuffer
+			self._temp_writebuffer = None
 
 		while len(writebuffer) > 0:
 			try: sent = self._conn.send(writebuffer)
-			except BlockingIOError: return False
+			except BlockingIOError:
+				self._temp_writebuffer = writebuffer
+				return False
 
 			writebuffer = writebuffer[sent:]
-			self._messagequeue[0] = writebuffer
 
 		sent = self._messagequeue.pop(0)
 		self._last_type_sent = sent.opcode()
@@ -64,6 +67,7 @@ class Link:
 		self._readbuffer = bytes()
 		self._last_type_sent = None
 		self._messagequeue = []
+		self._temp_writebuffer = None
 
 class LinkServer(Link):
 	def accept(self):
