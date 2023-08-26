@@ -31,13 +31,15 @@ class Link:
 		if not self.send_buffer_ready():
 			raise PrematureSendException
 
-		writebuffer = self._messagequeue[0].to_bytes()
+		try: writebuffer = self._messagequeue[0].to_bytes()
+		except AttributeError: writebuffer = self._messagequeue[0]
 
 		while len(writebuffer) > 0:
 			try: sent = self._conn.send(writebuffer)
 			except BlockingIOError: return False
 
 			writebuffer = writebuffer[sent:]
+			self._messagequeue[0] = writebuffer
 
 		sent = self._messagequeue.pop(0)
 		self._last_type_sent = sent.opcode()
