@@ -123,7 +123,7 @@ class Mux:
 		allow += [MessageOp.TERMINATE, MessageOp.ERROR]
 
 		if message.opcode() in allow:
-			print("forwarding piped message through to uplink")
+			print(f"forwarding piped message (size {len(message.to_bytes())} through to uplink")
 			self._uplink_send(message)
 			return
 
