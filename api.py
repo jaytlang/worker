@@ -59,12 +59,12 @@ def save(filename):
 	if type(filename) is not str:
 		raise TypeError("save only takes string arguments")
 
+	with open(filename, 'rb') as f: content = f.read()
+
 	lock.acquire()
 
-	with open(filename, 'rb') as f:
-		content = f.read()
-		message = Message(MessageOp.SENDFILE, label=bytes(filename, encoding='ascii'), file=content)
-		pipe.send_message(message)
+	message = Message(MessageOp.SENDFILE, label=bytes(filename, encoding='ascii'), file=content)
+	pipe.send_message(message)
 
 	response = pipe.receive_message()
 	if response.opcode() != MessageOp.ACK:
