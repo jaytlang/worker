@@ -59,7 +59,10 @@ def save(filename):
 	if type(filename) is not str:
 		raise TypeError("save only takes string arguments")
 
-	with open(filename, 'rb') as f: content = f.read()
+	try:
+		with open(filename, 'rb') as f: content = f.read()
+	except IOError as err:
+		raise IOError(f"error saving {filename}: {err}")
 
 	lock.acquire()
 
